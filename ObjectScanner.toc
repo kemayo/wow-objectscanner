@@ -1,0 +1,17 @@
+## Interface: 80300
+## Title: ObjectScanner
+## Author: Kemayo
+## Notes: Announce when you see important objects
+## OptionalDeps: LibStub
+## SavedVariables: ObjectScannerDB
+## Version: 1
+
+## X-Website: https://www.wowace.com/projects/objectscanner
+## X-License: BSD
+## X-Curse-Project-ID: 
+
+#@no-lib-strip@
+#embeds.xml
+#@end-no-lib-strip@
+
+addon.lua

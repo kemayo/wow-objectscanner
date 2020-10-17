@@ -1,4 +1,4 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: ObjectScanner
 ## Author: Kemayo
 ## Notes: Announce when you see important objects

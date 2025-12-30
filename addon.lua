@@ -21,20 +21,34 @@ function ns:ADDON_LOADED(event, addon)
         })
         db = _G[myname.."DB"]
 
-        GameTooltip:HookScript("OnShow", ns.OnTooltipShow)
+        if _G.C_TooltipInfo then
+            -- Cata-classic has TooltipDataProcessor, but doesn't actually use the new tooltips
+            TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Object, function(tooltip, tooltipData)
+                if tooltip ~= GameTooltip then return end
+                if not (tooltipData and tooltipData.lines) then
+                    return
+                end
+                ns.CheckAndAnnounce(tooltipData.lines[1].leftText)
+            end)
+        else
+            GameTooltip:HookScript("OnShow", function(tooltip)
+                if tooltip:GetUnit() or tooltip:GetItem() or tooltip:GetSpell() then return end
+                local title = _G[tooltip:GetName() .. "TextLeft1"]
+                if not title then return end
+                ns.CheckAndAnnounce(title:GetText())
+            end)
+        end
     end
 end
 ns:RegisterEvent("ADDON_LOADED")
 
-function ns.OnTooltipShow(tooltip)
-    if tooltip:GetUnit() or tooltip:GetItem() or tooltip:GetSpell() then return end
-    local title = _G[tooltip:GetName() .. "TextLeft1"]
-    if not title then return end
-    local titleText = title:GetText()
-    if not titleText then return end
+function ns.CheckAndAnnounce(titleText)
     -- ns.Print("Tooltip shown with title", titleText)
+    if not titleText then return end
+    if issecretvalue and issecretvalue(titleText) then return end
     if db.objects[titleText] then
         local willPlay, soundHandle = PlaySound(11466, "master", true)
+        ns.Print("Seen:", titleText)
     end
 end
 

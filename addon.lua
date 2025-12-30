@@ -10,15 +10,32 @@ f:SetScript("OnEvent", function(self, event, ...) if ns[event] then return ns[ev
 function ns:RegisterEvent(...) for i=1,select("#", ...) do f:RegisterEvent((select(i, ...))) end end
 function ns:UnregisterEvent(...) for i=1,select("#", ...) do f:UnregisterEvent((select(i, ...))) end end
 
+function setDefaults(options, defaults)
+    setmetatable(options, { __index = function(t, k)
+        if type(defaults[k]) == "table" then
+            t[k] = setDefaults({}, defaults[k])
+            return t[k]
+        end
+        return defaults[k]
+    end, })
+    -- and add defaults to existing tables
+    for k, v in pairs(options) do
+        if defaults[k] and type(v) == "table" then
+            setDefaults(v, defaults[k])
+        end
+    end
+    return options
+end
+
+local defaults = {
+    objects = {
+        ["Edge of Reality"] = true,
+    }
+}
+
 function ns:ADDON_LOADED(event, addon)
     if addon == myname then
-        _G[myname.."DB"] = setmetatable(_G[myname.."DB"] or {}, {
-            __index = {
-                objects = {
-                    ["Edge of Reality"] = true,
-                }
-            },
-        })
+        _G[myname.."DB"] = setDefaults(_G[myname.."DB"] or {}, defaults)
         db = _G[myname.."DB"]
 
         if _G.C_TooltipInfo then
@@ -63,7 +80,14 @@ SlashCmdList[myname:upper()] = function(msg)
     elseif msg == "" then
         ns.Print("Currently scanning tooltips for:")
         for name in pairs(db.objects) do
-            ns.Print("-", name)
+            if db.objects[name] then
+                ns.Print("-", name)
+            end
+        end
+        for name in pairs(defaults.objects) do
+            if rawget(db.objects, name) == nil then
+                ns.Print("-", name)
+            end
         end
         ns.Print("Toggle with /objectscanner [name]")
     end
